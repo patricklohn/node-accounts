@@ -207,14 +207,19 @@ function pocket(name){
         }
     ]).then((answer) => {
         const pocket = answer['pocketValue'];
+        const accontData = getAccount(name)
 
         if(!pocket){
             console.log(chalk.red('Aconteceu algum erro'))
-            return pocket()
+            return withdraw()
+        }
+
+        if(accontData.balance < pocket){
+            console.log(chalk.red('Valor solicitado maior que o disponivel em conta!'))
+            return withdraw()
         }
 
         const valorDescontar = pocket; 
-        const accontData = getAccount(name)
         accontData.balance = parseFloat(accontData.balance) - valorDescontar;
 
         fs.writeFileSync(`accounts/${name}.json`,JSON.stringify(accontData), function (err) {
