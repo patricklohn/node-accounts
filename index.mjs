@@ -32,7 +32,7 @@ function operation(){
     }else if(action === 'Depositar'){
         deposit()
     }else if(action === 'Sacar'){
-
+        withdraw()
     }else if(action === 'Sair'){
         console.log(chalk.bgBlue.black('Obrigado por usar o Accounts!'))
         process.exit()
@@ -160,18 +160,70 @@ function getAccountBalance(){
         const accontName = answer['AccountName']
         // verificar existencia da conta
         if(!checkname(accontName)){
+            console.log(`A conta ${accontName} não existe !!`)
             return getAccountBalance()
         }
 
         const accontData = getAccount(accontName);
-        console.log(chalk.bgBlue.Black(`Oi ${accontName}. Seu saldo é de R$${parseFloat(accontData.balance)}`))
+        console.log(chalk.bgBlue.black(`Oi ${accontName}. Seu saldo é de R$${parseFloat(accontData.balance)}`))
         operation()
 
     }).catch(err => console.log(chalk.red(err)))
 }
 
-// sacar valor
+// validar sacar valor
 
 function withdraw(){
     
+    inquirer.prompt([
+        {
+            name: 'accountName',
+            message: 'Qual seria o nome da sua conta?'
+
+        }
+    ]).then((answer) => {
+        const accontName = answer['accountName'];
+
+        if(!checkname(accontName)){
+            console.log(`A conta ${accontName} não existe !!`)
+            return withdraw()
+        }
+
+        pocket(accontName);
+
+    }).catch((err) => console.log(chalk.red(err)))
+
 }
+
+// sacar valor
+
+function pocket(name){
+     
+    inquirer.prompt([
+        {
+            name: 'pocketValue',
+            message: 'Qual valor sera sacado?'
+
+        }
+    ]).then((answer) => {
+        const pocket = answer['pocketValue'];
+
+        if(!pocket){
+            console.log(chalk.red('Aconteceu algum erro'))
+            return pocket()
+        }
+
+        const valorDescontar = pocket; 
+        const accontData = getAccount(name)
+        accontData.balance = parseFloat(accontData.balance) - valorDescontar;
+
+        fs.writeFileSync(`accounts/${name}.json`,JSON.stringify(accontData), function (err) {
+            console.log(err)}, )
+        
+        console.log(chalk.green(`Valor da conta descontato. Saldo atual de R$${accontData.balance}`))
+
+        operation();
+
+}).catch((err) => console.log(chalk.red(err)))
+}
+
